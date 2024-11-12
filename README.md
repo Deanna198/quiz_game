@@ -1,2 +1,2 @@
 # quiz_game
-java prrogram for a quiz game
+java program for a quiz game
