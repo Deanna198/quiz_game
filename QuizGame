@@ -1,0 +1,233 @@
+import java.util.*;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException;
+
+class Question {
+    private String questionText;
+    private String[] options;
+    private int correctAnswer;
+    private String hint;
+
+    public Question(String questionText, String[] options, int correctAnswer, String hint) {
+        this.questionText = questionText;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+        this.hint = hint;
+    }
+
+    public String getQuestionText() {
+        return questionText;
+    }
+
+    public String[] getOptions() {
+        return options;
+    }
+
+    public String getHint() {
+        return hint;
+    }
+
+    public boolean isCorrect(int answer) {
+        return answer == correctAnswer;
+    }
+}
+
+class Player {
+    private String name;
+    private int score;
+
+    public Player(String name) {
+        this.name = name;
+        this.score = 0;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void incrementScore() {
+        score++;
+    }
+
+    public void decrementScore() {
+        score--;
+    }
+}
+
+public class QuizGame {
+    private static final int QUESTION_COUNT = 15;
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        playSound("start.wav");
+
+        System.out.print("Enter your name: ");
+        String playerName = scanner.nextLine();
+        Player player = new Player(playerName);
+
+        
+        String difficultyLevel = chooseDifficulty();
+
+        // Welcome message
+        System.out.println("\n" + coloredText("Welcome, " + player.getName() + " to the Ultimate Quiz Challenge!", "cyan"));
+        System.out.println(coloredText("🚀 Let's get started!\n", "green"));
+
+        // Create the questions
+        List<Question> questions = createQuestions(difficultyLevel);
+        Collections.shuffle(questions); // Shuffle questions to make selection random
+        List<Question> selectedQuestions = questions.subList(0, QUESTION_COUNT); // Select 15 questions
+
+        // Loop through questions
+        for (int i = 0; i < selectedQuestions.size(); i++) {
+            Question question = selectedQuestions.get(i);
+            System.out.println(coloredText("✨ Question " + (i + 1) + ": " + question.getQuestionText(), "magenta"));
+            for (int j = 0; j < question.getOptions().length; j++) {
+                System.out.println("  " + coloredText((j + 1) + ". " + question.getOptions()[j], "blue"));
+            }
+
+            // Get the player's answer
+            int playerAnswer = getAnswer();
+
+            // Process the answer
+            if (playerAnswer >= 1 && playerAnswer <= 4) { // Valid range check
+                if (question.isCorrect(playerAnswer)) {
+                    player.incrementScore();
+                    System.out.println(coloredText("✅ Correct!\n", "green"));
+                    playSound("correct.wav");
+                } else {
+                    System.out.println(coloredText("❌ Incorrect.\n", "red"));
+                    playSound("wrong.wav");
+                }
+            } else {
+                System.out.println(coloredText("❌ Invalid answer. Please enter a number between 1 and 4.\n", "red"));
+            }
+            System.out.println(coloredText("────────────────────────────────────", "white"));
+        }
+
+        // End message and final score
+        System.out.println(coloredText("🎉 Quiz Over! 🎉", "yellow"));
+        System.out.println(coloredText("📊 Your final score: " + player.getScore() + "/" + QUESTION_COUNT, "green"));
+        playSound("end.wav");
+        System.out.println(coloredText("Thanks for playing, " + player.getName() + "! 🌟", "cyan"));
+    }
+
+    private static List<Question> createQuestions(String difficultyLevel) {
+        List<Question> questions = new ArrayList<>();
+
+        // Easy questions
+        if (difficultyLevel.equals("Easy")) {
+            questions.add(new Question("What is 2 + 2?", new String[]{"3", "4", "5", "6"}, 2, "It's a simple addition."));
+            questions.add(new Question("What color is the sky?", new String[]{"Red", "Blue", "Green", "Yellow"}, 2, "It's the color you see on a clear day."));
+            questions.add(new Question("What is the capital of France?", new String[]{"Paris", "London", "Berlin", "Rome"}, 1, "It's a romantic city known for its Eiffel Tower."));
+            questions.add(new Question("What is 5 + 3?", new String[]{"7", "8", "6", "9"}, 2, "Simple addition."));
+            questions.add(new Question("What shape is a football?", new String[]{"Circle", "Square", "Oval", "Triangle"}, 3, "Think of its shape during a game."));
+            questions.add(new Question("What is the capital of USA?", new String[]{"Washington D.C.", "New York", "Los Angeles", "Chicago"}, 1, "It’s the political capital of the USA."));
+            questions.add(new Question("What is 10 - 3?", new String[]{"7", "6", "8", "5"}, 1, "Simple subtraction."));
+            questions.add(new Question("Which of these is a fruit?", new String[]{"Carrot", "Apple", "Potato", "Cucumber"}, 2, "It’s often red or green."));
+            questions.add(new Question("Which animal says 'meow'?", new String[]{"Dog", "Cat", "Cow", "Horse"}, 2, "It’s a common pet animal."));
+            questions.add(new Question("What is 7 * 1?", new String[]{"7", "8", "9", "6"}, 1, "Simple multiplication."));
+            questions.add(new Question("What is the color of grass?", new String[]{"Blue", "Green", "Yellow", "Red"}, 2, "It’s the color of most lawns."));
+            questions.add(new Question("Which one is a primary color?", new String[]{"Purple", "Green", "Red", "Orange"}, 3, "It’s one of the basic colors."));
+            questions.add(new Question("What animal has a long trunk?", new String[]{"Tiger", "Elephant", "Giraffe", "Lion"}, 2, "It’s a large animal found in Asia and Africa."));
+            questions.add(new Question("How many days are there in a week?", new String[]{"5", "6", "7", "8"}, 3, "The standard week has seven days."));
+            questions.add(new Question("Which season comes after winter?", new String[]{"Spring", "Summer", "Autumn", "Fall"}, 1, "It’s the season when flowers bloom."));
+        }
+
+        // Medium questions
+        else if (difficultyLevel.equals("Medium")) {
+            questions.add(new Question("What is the chemical symbol for water?", new String[]{"H2O", "O2", "CO2", "NaCl"}, 1, "It consists of two hydrogen atoms and one oxygen atom."));
+            questions.add(new Question("Which planet is known as the Red Planet?", new String[]{"Earth", "Mars", "Jupiter", "Saturn"}, 2, "It’s the 4th planet from the Sun."));
+            questions.add(new Question("What is the capital of Japan?", new String[]{"Beijing", "Seoul", "Tokyo", "Osaka"}, 3, "It’s the largest city in Japan."));
+            questions.add(new Question("Who is the author of '1984'?", new String[]{"George Orwell", "Aldous Huxley", "J.K. Rowling", "Ray Bradbury"}, 1, "This novel deals with a dystopian society."));
+            questions.add(new Question("What is the largest continent?", new String[]{"Africa", "Asia", "Europe", "North America"}, 2, "It’s the continent where China and India are located."));
+            questions.add(new Question("In what year did World War I begin?", new String[]{"1912", "1914", "1916", "1918"}, 2, "It was the 'Great War' before World War II."));
+            questions.add(new Question("What is the square root of 81?", new String[]{"7", "9", "8", "10"}, 2, "It’s the number you multiply by itself to get 81."));
+            questions.add(new Question("Which planet has the most moons?", new String[]{"Earth", "Jupiter", "Mars", "Saturn"}, 4, "Think about the gas giants."));
+            questions.add(new Question("Who discovered penicillin?", new String[]{"Marie Curie", "Alexander Fleming", "Louis Pasteur", "Gregor Mendel"}, 2, "This discovery revolutionized medicine."));
+            questions.add(new Question("What is the boiling point of water?", new String[]{"90°C", "100°C", "110°C", "120°C"}, 2, "At sea level, water boils at 100°C."));
+            questions.add(new Question("What is the largest mammal?", new String[]{"Elephant", "Blue Whale", "Giraffe", "Shark"}, 2, "It’s a marine animal."));
+            questions.add(new Question("Who invented the lightbulb?", new String[]{"Thomas Edison", "Nikola Tesla", "Albert Einstein", "Alexander Graham Bell"}, 1, "He also invented the phonograph."));
+            questions.add(new Question("In what year did the Titanic sink?", new String[]{"1905", "1910", "1912", "1915"}, 3, "It sank during its maiden voyage."));
+            questions.add(new Question("Which country is famous for the pyramids?", new String[]{"Greece", "Egypt", "Italy", "India"}, 2, "It’s located in North Africa."));
+            questions.add(new Question("What is the longest river in the world?", new String[]{"Amazon", "Nile", "Yangtze", "Mississippi"}, 2, "It flows through northeastern Africa."));
+        }
+
+        // Hard questions
+        else {
+            questions.add(new Question("What is the atomic number of carbon?", new String[]{"6", "12", "8", "4"}, 1, "It’s the number of protons in a carbon atom."));
+            questions.add(new Question("What is the capital of Nepal?", new String[]{"Kathmandu", "Lhasa", "New Delhi", "Beijing"}, 1, "It’s located near the Himalayas."));
+            questions.add(new Question("Which philosopher wrote 'The Republic'?", new String[]{"Plato", "Aristotle", "Socrates", "Descartes"}, 1, "He was a student of Socrates."));
+            questions.add(new Question("What is the name of the smallest bone in the human body?", new String[]{"Stapes", "Malleus", "Incus", "Clavicle"}, 1, "It’s located in the middle ear."));
+            questions.add(new Question("Which element has the chemical symbol 'Na'?", new String[]{"Sodium", "Nitrogen", "Neon", "Nickel"}, 1, "It’s a soft, silvery-white metal."));
+            questions.add(new Question("Who developed the theory of relativity?", new String[]{"Isaac Newton", "Nikola Tesla", "Albert Einstein", "Max Planck"}, 3, "His work revolutionized our understanding of physics."));
+            questions.add(new Question("What is the name of the largest volcano in the solar system?", new String[]{"Olympus Mons", "Mount Everest", "Kilauea", "Mount Fuji"}, 1, "It’s located on Mars."));
+            questions.add(new Question("What is the value of Pi to two decimal places?", new String[]{"3.12", "3.14", "3.15", "3.16"}, 2, "It’s used in geometry to calculate the circumference of circles."));
+            questions.add(new Question("Who was the first person to walk on the moon?", new String[]{"Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "Michael Collins"}, 2, "He said, 'That's one small step for [a] man...'"));
+            questions.add(new Question("Which city hosted the first modern Olympics?", new String[]{"Paris", "London", "Athens", "Berlin"}, 3, "It was in the late 19th century."));
+            questions.add(new Question("What is the freezing point of water in Fahrenheit?", new String[]{"32°F", "0°F", "-32°F", "-100°F"}, 1, "This is the standard freezing temperature."));
+            questions.add(new Question("What is the main ingredient in traditional Japanese miso soup?", new String[]{"Tofu", "Seaweed", "Miso", "Rice"}, 3, "It’s made from fermented soybeans."));
+            questions.add(new Question("Which city is known as the City of Love?", new String[]{"Venice", "Paris", "Rome", "Berlin"}, 2, "It’s known for romance and its iconic Eiffel Tower."));
+            questions.add(new Question("What is the largest desert on Earth?", new String[]{"Sahara", "Arctic", "Gobi", "Kalahari"}, 2, "It's a cold desert, located in the Arctic region."));
+            questions.add(new Question("What is the chemical formula for methane?", new String[]{"CH4", "C2H6", "C3H8", "CO2"}, 1, "It's a simple hydrocarbon gas."));
+        }
+
+        return questions;
+    }
+
+    private static String chooseDifficulty() {
+        System.out.println("Choose your difficulty level: ");
+        System.out.println("1. Easy");
+        System.out.println("2. Medium");
+        System.out.println("3. Hard");
+        int choice = getAnswer();
+        switch (choice) {
+            case 1: return "Easy";
+            case 2: return "Medium";
+            case 3: return "Hard";
+            default: return "Easy"; // Default to Easy if invalid input
+        }
+    }
+
+    private static int getAnswer() {
+        while (!scanner.hasNextInt()) {
+            scanner.next(); // Consume invalid input
+            System.out.println(coloredText("❌ Invalid input. Please enter a valid number.", "red"));
+        }
+        return scanner.nextInt();
+    }
+
+    private static void playSound(String soundFile) {
+        try {
+            File sound = new File("sounds/" + soundFile);
+            if (sound.exists()) {
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(sound);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioStream);
+                clip.start();
+            } else {
+                System.out.println("Sound file not found: " + soundFile);
+            }
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            System.out.println("Error playing sound: " + e.getMessage());
+        }
+    }
+
+    private static String coloredText(String text, String color) {
+        Map<String, String> colors = new HashMap<>();
+        colors.put("black", "\033[0;30m");
+        colors.put("red", "\033[0;31m");
+        colors.put("green", "\033[0;32m");
+        colors.put("yellow", "\033[0;33m");
+        colors.put("blue", "\033[0;34m");
+        colors.put("magenta", "\033[0;35m");
+        colors.put("cyan", "\033[0;36m");
+        colors.put("white", "\033[0;37m");
+
+        return colors.getOrDefault(color, "\033[0m") + text + "\033[0m";
+    }
+}
